@@ -18,7 +18,6 @@ function App() {
 
   useEffect(() => {
     if(!isAuthenticated) {
-      setConversations([]);
       return;
     }
     const loadConversations = async () => {

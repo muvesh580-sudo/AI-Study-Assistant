@@ -35,7 +35,7 @@ function Auth({ setIsAuthenticated }) {
       setLoading(true);
       setError("");
 
-      const data = await registerUser(name, email, password);
+      await registerUser(name, email, password);
 
       const loginData = await loginUser(email, password);
 
