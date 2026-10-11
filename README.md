@@ -1,5 +1,11 @@
 # AI Study Assistant
 
+**Live Demo:** https://ai-study-assistant-4ga077e1r-uvesh2.vercel.app
+
+**Backend API:** https://ai-study-assistant-gfwu.onrender.com
+
+An AI-powered learning platform that helps students understand topics, summarize content, generate quizzes, and create study flashcards.
+
 An AI-powered study companion that helps students understand concepts, summarize notes, generate quizzes, and create flashcards. Built with React, Node.js, Express, MongoDB, and Groq AI.
 
 ## Overview
