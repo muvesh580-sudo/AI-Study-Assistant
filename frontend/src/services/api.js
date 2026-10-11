@@ -1,8 +1,9 @@
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 export async function getConversations() {
   const token = localStorage.getItem("token");
 
   const response = await fetch(
-    "http://localhost:5000/api/conversations",
+    `${API_URL}/api/conversations`,
     {
       headers: {
         Authorization: `Bearer ${token}`
@@ -20,7 +21,7 @@ export async function getConversations() {
 }
 export async function askAI(question, mode) {
   const token = localStorage.getItem("token");
-  const response = await fetch("http://localhost:5000/api/ask", {
+  const response = await fetch(`${API_URL}/api/ask`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -42,7 +43,7 @@ export async function askAI(question, mode) {
 }
 
 export async function registerUser(name, email, password) {
-  const response = await fetch("http://localhost:5000/api/register", {
+  const response = await fetch(`${API_URL}/api/register`, {
     method:"POST",
     headers:{
       "Content-Type": "application/json",
@@ -63,7 +64,7 @@ export async function registerUser(name, email, password) {
 }
 
 export async function loginUser(email, password) {
-  const response = await fetch("http://localhost:5000/api/login",{
+  const response = await fetch(`${API_URL}/api/login`,{
     method : "POST",
     headers : {
       "Content-Type":"application/json",
