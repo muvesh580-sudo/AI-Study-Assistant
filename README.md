@@ -1,6 +1,6 @@
 # AI Study Assistant
 
-**Live Demo:** https://ai-study-assistant-4ga077e1r-uvesh2.vercel.app
+**Live Demo:** https://ai-study-assistant-nu-six.vercel.app
 
 **Backend API:** https://ai-study-assistant-gfwu.onrender.com
 
