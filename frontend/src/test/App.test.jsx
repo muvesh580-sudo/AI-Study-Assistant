@@ -116,7 +116,7 @@ describe("App", () => {
     });
 
     render(<App />);
-    await user.click(screen.getByRole("button", { name: "❓ Quiz" }));
+    await user.click(screen.getByRole("button", { name: "Quiz" }));
     await user.type(screen.getByLabelText("Your question"), "Cells");
     await user.click(screen.getByRole("button", { name: "Ask AI" }));
 
@@ -161,11 +161,142 @@ describe("App", () => {
     await user.keyboard("{Enter}");
 
     expect(await screen.findByText("DNA")).toBeInTheDocument();
-    expect(screen.getByLabelText("Your question")).toHaveValue("What is DNA?");
-    expect(screen.getByRole("button", { name: "❓ Quiz" })).toHaveAttribute(
+    expect(screen.getByRole("heading", { name: "What is DNA?" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Quiz" })).toHaveAttribute(
       "aria-pressed",
       "true"
     );
+  });
+
+  it("sends with Enter but keeps Shift + Enter as a new line", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem("token", "abc");
+    const fetchMock = stubApi({
+      "/api/conversations": () => json([]),
+      "/api/ask": () => json({ answer: "Reply", conversation }),
+    });
+
+    render(<App />);
+    const textarea = screen.getByLabelText("Your question");
+    await user.type(textarea, "Line one{Shift>}{Enter}{/Shift}Line two");
+
+    expect(callsTo(fetchMock, "/api/ask")).toHaveLength(0);
+
+    await user.keyboard("{Enter}");
+
+    expect(await screen.findByText("Reply")).toBeInTheDocument();
+    const [, options] = callsTo(fetchMock, "/api/ask")[0];
+    expect(JSON.parse(options.body).question).toBe("Line one\nLine two");
+    expect(textarea).toHaveValue("");
+  });
+
+  it("keeps the question when asking fails so it can be retried", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem("token", "abc");
+    stubApi({
+      "/api/conversations": () => json([]),
+      "/api/ask": () => json({ error: "The AI service is busy." }, 503),
+    });
+
+    render(<App />);
+    await user.type(screen.getByLabelText("Your question"), "Cells");
+    await user.click(screen.getByRole("button", { name: "Ask AI" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("The AI service is busy.");
+    expect(screen.getByLabelText("Your question")).toHaveValue("Cells");
+  });
+
+  it("starts a new chat without losing the history", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem("token", "abc");
+    stubApi({ "/api/conversations": () => json([conversation]) });
+
+    render(<App />);
+    await user.click(await screen.findByRole("button", { name: /What is DNA\?/ }));
+    await screen.findByRole("heading", { name: /AI Answer/ });
+    await user.click(screen.getByRole("button", { name: "New chat" }));
+
+    expect(screen.queryByRole("heading", { name: /AI Answer/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /What are you studying/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /What is DNA\?/ })).toBeInTheDocument();
+  });
+
+  it("selects a mode from the welcome cards", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem("token", "abc");
+    stubApi({ "/api/conversations": () => json([]) });
+
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: /Turn your notes/ }));
+
+    expect(screen.getByRole("button", { name: "Summarize" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    expect(screen.getByLabelText("Your question")).toHaveFocus();
+  });
+
+  it("filters the history by search text", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem("token", "abc");
+    stubApi({
+      "/api/conversations": () =>
+        json([conversation, { ...conversation, _id: "2", question: "Newton's laws" }]),
+    });
+
+    render(<App />);
+    await screen.findByRole("button", { name: /Newton/ });
+    await user.type(screen.getByLabelText("Search conversations"), "newton");
+
+    expect(screen.getByRole("button", { name: /Newton/ })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /What is DNA\?/ })).not.toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("Search conversations"), "zzz");
+    expect(screen.getByText("No matching conversations.")).toBeInTheDocument();
+  });
+
+  it("copies the answer", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem("token", "abc");
+    const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue();
+    stubApi({ "/api/conversations": () => json([conversation]) });
+
+    render(<App />);
+    await user.click(await screen.findByRole("button", { name: /What is DNA\?/ }));
+    await user.click(await screen.findByRole("button", { name: "Copy" }));
+
+    expect(writeText).toHaveBeenCalledWith("**DNA** answer");
+    expect(await screen.findByRole("button", { name: "Copied" })).toBeInTheDocument();
+  });
+
+  it("switches theme and remembers the choice", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem("token", "abc");
+    localStorage.setItem("theme", "dark");
+    stubApi({ "/api/conversations": () => json([]) });
+
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Light mode" }));
+
+    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(localStorage.getItem("theme")).toBe("light");
+    expect(screen.getByRole("button", { name: "Dark mode" })).toBeInTheDocument();
+  });
+
+  it("opens and closes the history drawer", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem("token", "abc");
+    stubApi({ "/api/conversations": () => json([conversation]) });
+
+    const { container } = render(<App />);
+    const drawer = container.querySelector("aside");
+    expect(drawer).toHaveClass("invisible");
+
+    await user.click(screen.getByRole("button", { name: "Open history" }));
+    expect(drawer).toHaveClass("visible");
+
+    await user.click(await screen.findByRole("button", { name: /What is DNA\?/ }));
+    expect(drawer).toHaveClass("invisible");
   });
 
   it("scrolls to the answer once it has rendered", async () => {
