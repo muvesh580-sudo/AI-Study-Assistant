@@ -49,13 +49,17 @@ function Auth({ setIsAuthenticated, notice }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-xl">
-        <h1 className="text-2xl font-bold text-white text-center">
+    <div className="min-h-svh bg-canvas flex flex-col items-center justify-center gap-6 px-4 py-8">
+      <p className="text-xl font-semibold text-ink">
+        <span className="text-accent-ink">AI</span> Study Assistant
+      </p>
+
+      <div className="w-full max-w-md rounded-2xl border border-line bg-panel p-6">
+        <h1 className="text-2xl font-semibold text-ink text-center">
           {isRegistering ? "Create Account" : "Welcome Back"}
         </h1>
 
-        <p className="mt-2 text-center text-slate-400">
+        <p className="mt-2 text-center text-muted">
            {isRegistering
              ? "Create an account to start learning with AI"
              : "Login to your AI Study Assistant"}
@@ -81,7 +85,7 @@ function Auth({ setIsAuthenticated, notice }) {
               onChange={(e) => setName(e.target.value)}
               required
               maxLength={100}
-              className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 text-white outline-none focus:border-blue-500"
+              className="w-full rounded-xl bg-canvas border border-line px-4 py-3 text-ink outline-none placeholder:text-muted focus:border-accent"
             />
           )}
           <input
@@ -92,7 +96,7 @@ function Auth({ setIsAuthenticated, notice }) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 text-white outline-none focus:border-blue-500"
+            className="w-full rounded-xl bg-canvas border border-line px-4 py-3 text-ink outline-none placeholder:text-muted focus:border-accent"
           />
 
           <input
@@ -105,11 +109,11 @@ function Auth({ setIsAuthenticated, notice }) {
             required
             minLength={isRegistering ? 8 : undefined}
             maxLength={isRegistering ? 72 : undefined}
-            className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 text-white outline-none focus:border-blue-500"
+            className="w-full rounded-xl bg-canvas border border-line px-4 py-3 text-ink outline-none placeholder:text-muted focus:border-accent"
           />
 
           {error && (
-            <p role="alert" className="text-sm text-red-400">
+            <p role="alert" className="text-sm text-danger">
               {error}
             </p>
           )}
@@ -117,7 +121,7 @@ function Auth({ setIsAuthenticated, notice }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-blue-600 py-3 font-medium text-white transition hover:bg-blue-500 disabled:opacity-50"
+            className="w-full rounded-xl bg-brand py-3 font-medium text-white transition hover:opacity-90 disabled:opacity-50"
           >
             {loading
               ? isRegistering
@@ -128,7 +132,7 @@ function Auth({ setIsAuthenticated, notice }) {
                 : "Login"}
           </button>
         </form>
-        <p className="mt-5 text-center text-sm text-slate-400">
+        <p className="mt-5 text-center text-sm text-muted">
           {isRegistering
              ? "Already have an account?"
              : "Don't have an account?"}{" "}
@@ -138,7 +142,7 @@ function Auth({ setIsAuthenticated, notice }) {
                 setIsRegistering(!isRegistering);
                 setError("");
              }}
-             className="font-medium text-blue-400 hover:text-blue-300"
+             className="font-medium text-accent-ink hover:underline"
            >
              {isRegistering ? "Login" : "Register"}
            </button>

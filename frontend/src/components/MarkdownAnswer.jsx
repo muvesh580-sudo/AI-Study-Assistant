@@ -16,7 +16,7 @@ const MarkdownAnswer = memo(function MarkdownAnswer({ answer, onRendered }) {
   }, [answer, onRendered]);
 
   return (
-    <div className="markdown-body text-left text-slate-300 leading-8 space-y-4">
+    <div className="markdown-body text-left leading-7 space-y-4">
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
         {answer}
       </ReactMarkdown>
