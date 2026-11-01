@@ -66,21 +66,28 @@ AI-Study-Assistant/
 │   ├── models/
 │   │   ├── Conversation.js
 │   │   └── User.js
+│   ├── tests/
+│   │   └── api.test.js
+│   ├── .env.example
 │   ├── .gitignore
+│   ├── app.js
 │   ├── package.json
 │   └── server.js
 │
 ├── frontend/
 │   ├── public/
 │   ├── src/
-│   │   ├── assets/
 │   │   ├── components/
-│   │   │   └── Auth.jsx
+│   │   │   ├── Auth.jsx
+│   │   │   └── MarkdownAnswer.jsx
 │   │   ├── services/
 │   │   │   └── api.js
+│   │   ├── test/
+│   │   │   ├── App.test.jsx
+│   │   │   └── setup.js
 │   │   ├── App.jsx
-│   │   ├── App.css
 │   │   └── index.css
+│   ├── .env.example
 │   ├── .gitignore
 │   ├── package.json
 │   └── vite.config.js
@@ -105,21 +112,25 @@ cd AI-Study-Assistant
 
 ### 2. Set up the backend
 
+Copy `backend/.env.example` to `backend/.env` and fill in the values. The server refuses to start if a required value is missing.
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `GROQ_API_KEY` | Yes | Groq API key |
+| `MONGODB_URI` | Yes | MongoDB connection string |
+| `JWT_SECRET` | Yes | Long random secret for signing login tokens |
+| `PORT` | No | API port, defaults to `5000` |
+| `CLIENT_ORIGINS` | In production | Comma-separated frontend URLs allowed to call the API |
+| `TRUST_PROXY` | No | Reverse proxies in front of the API, defaults to `1` |
+| `DNS_SERVERS` | No | DNS servers for `mongodb+srv` lookups, empty for the system resolver |
+
+Then start the backend:
+
 ```bash
 cd backend
 npm install
 npm start
 ```
-
-Create a `.env` file inside the `backend/` directory and configure these variables:
-
-```env
-GROQ_API_KEY=your_groq_api_key
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_random_secret
-```
-
-Start the backend using the start script defined in `backend/package.json`.
 
 ### 3. Set up the frontend
 
@@ -133,4 +144,29 @@ npm run dev
 
 Open the local URL printed by Vite in your terminal.
 
-**Note:** Configure the backend API URL and CORS settings appropriately for your environment.
+Set `VITE_API_URL` if the API isn't on `http://localhost:5000`, and add the frontend's URL to `CLIENT_ORIGINS` on the backend.
+
+## API
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| `GET` | `/api/health` | No | Service and database status |
+| `POST` | `/api/register` | No | Create an account |
+| `POST` | `/api/login` | No | Get a login token |
+| `POST` | `/api/ask` | Bearer token | Ask the AI and save the conversation |
+| `GET` | `/api/conversations` | Bearer token | The caller's 50 most recent conversations |
+
+## Testing
+
+```bash
+cd backend
+npm test
+```
+
+```bash
+cd frontend
+npm test
+npm run lint
+```
+
+Backend tests run against a temporary in-memory MongoDB and a fake AI client, so they never touch your real database or Groq quota. The first run downloads a MongoDB binary.
