@@ -21,7 +21,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DEFAULT_CLIENT_ORIGINS = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
-  "https://ai-study-assistant-4ga077e1r-uvesh2.vercel.app",
+  "https://ai-study-assistant-nu-six.vercel.app",
 ];
 
 // Compared against when the email is unknown, so both login failures take the same time.

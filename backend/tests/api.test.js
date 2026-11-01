@@ -389,9 +389,14 @@ describe("HTTP behaviour", () => {
         .set("Access-Control-Request-Method", "POST");
 
     const allowed = await preflight("http://localhost:5173");
+    const live = await preflight("https://ai-study-assistant-nu-six.vercel.app");
     const blocked = await preflight("https://evil.example");
 
     assert.equal(allowed.headers["access-control-allow-origin"], "http://localhost:5173");
+    assert.equal(
+      live.headers["access-control-allow-origin"],
+      "https://ai-study-assistant-nu-six.vercel.app"
+    );
     assert.equal(blocked.headers["access-control-allow-origin"], undefined);
   });
 
