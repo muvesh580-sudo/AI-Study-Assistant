@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { loginUser, registerUser } from "../services/api";
 
-function Auth({ setIsAuthenticated }) {
+function Auth({ setIsAuthenticated, notice }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,6 +61,12 @@ function Auth({ setIsAuthenticated }) {
              : "Login to your AI Study Assistant"}
         </p>
 
+        {notice && (
+          <p role="status" className="mt-4 text-center text-sm text-amber-400">
+            {notice}
+          </p>
+        )}
+
           <form
            onSubmit={isRegistering ? handleRegister : handleLogin}
            className="mt-6 space-y-4"
@@ -69,30 +75,41 @@ function Auth({ setIsAuthenticated }) {
             <input
               type="text"
               placeholder="Full Name"
+              aria-label="Full Name"
+              autoComplete="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              maxLength={100}
               className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 text-white outline-none focus:border-blue-500"
             />
           )}
           <input
             type="email"
             placeholder="Email"
+            aria-label="Email"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
             className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 text-white outline-none focus:border-blue-500"
           />
 
           <input
             type="password"
-            placeholder="Password"
+            placeholder={isRegistering ? "Password (at least 8 characters)" : "Password"}
+            aria-label="Password"
+            autoComplete={isRegistering ? "new-password" : "current-password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={isRegistering ? 8 : undefined}
+            maxLength={isRegistering ? 72 : undefined}
             className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 text-white outline-none focus:border-blue-500"
           />
 
           {error && (
-            <p className="text-sm text-red-400">
+            <p role="alert" className="text-sm text-red-400">
               {error}
             </p>
           )}

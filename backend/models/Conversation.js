@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+export const CONVERSATION_MODES = ["explain", "summarize", "quiz", "flashcards"];
+
 const conversationSchema = new mongoose.Schema(
   {
 
@@ -17,6 +19,7 @@ const conversationSchema = new mongoose.Schema(
     mode: {
       type: String,
       required: true,
+      enum: CONVERSATION_MODES,
     },
 
     answer: {
@@ -28,6 +31,8 @@ const conversationSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+conversationSchema.index({ user: 1, createdAt: -1 });
 
 const Conversation = mongoose.model("Conversation", conversationSchema);
 

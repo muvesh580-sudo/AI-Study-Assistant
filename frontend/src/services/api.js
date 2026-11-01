@@ -1,86 +1,97 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-export async function getConversations() {
+
+async function request(path, options, fallbackError) {
+  let response;
+
+  try {
+    response = await fetch(`${API_URL}${path}`, options);
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw error;
+    }
+
+    throw new Error("Could not reach the server. Please try again.");
+  }
+
+  // Proxies and cold-starting hosts can answer with HTML instead of JSON.
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const error = new Error(data?.error || fallbackError);
+    error.status = response.status;
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getConversations(signal) {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(
-    `${API_URL}/api/conversations`,
+  return request(
+    "/api/conversations",
     {
       headers: {
         Authorization: `Bearer ${token}`
       },
-    }
-  );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || "Failed to fetch conversations");
-  }
-
-  return data;
-}
-export async function askAI(question, mode) {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/api/ask`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      signal,
     },
-    body: JSON.stringify({
-      question: question,
-      mode: mode,
-    }),
-  });
+    "Failed to fetch conversations"
+  );
+}
 
-  const data = await response.json();
+export async function askAI(question, mode, signal) {
+  const token = localStorage.getItem("token");
 
-  if (!response.ok) {
-    throw new Error(data.error || "Something went wrong");
-  }
-
-  return data;
+  return request(
+    "/api/ask",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        question: question,
+        mode: mode,
+      }),
+      signal,
+    },
+    "Something went wrong"
+  );
 }
 
 export async function registerUser(name, email, password) {
-  const response = await fetch(`${API_URL}/api/register`, {
-    method:"POST",
-    headers:{
-      "Content-Type": "application/json",
+  return request(
+    "/api/register",
+    {
+      method:"POST",
+      headers:{
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+      }),
     },
-    body: JSON.stringify({
-      name,
-      email,
-      password,
-    }),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || "Registration failed");
-  }
-  return data;
+    "Registration failed"
+  );
 }
 
 export async function loginUser(email, password) {
-  const response = await fetch(`${API_URL}/api/login`,{
-    method : "POST",
-    headers : {
-      "Content-Type":"application/json",
+  return request(
+    "/api/login",
+    {
+      method : "POST",
+      headers : {
+        "Content-Type":"application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
     },
-    body: JSON.stringify({
-      email,
-      password,
-    }),
-  });
-
-  const data = await response.json();
-
-  if(!response.ok){
-    throw new Error(data.error || "Login failed");
-  }
-
-  return data;
+    "Login failed"
+  );
 }
-
