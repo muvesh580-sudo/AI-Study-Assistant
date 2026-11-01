@@ -97,7 +97,13 @@ function App() {
       const data = await askAI(question, mode, controller.signal);
 
       setAnswer(data.answer);
-      setConversations((current) => [data.conversation, ...current]);
+
+      if (data.conversation) {
+        setConversations((current) => [data.conversation, ...current]);
+      } else {
+        // An older backend can still be live while a new frontend deploys.
+        setConversations(await getConversations(controller.signal));
+      }
     } catch(error) {
       handleRequestError(error);
     } finally{

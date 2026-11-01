@@ -131,6 +131,25 @@ describe("App", () => {
     );
   });
 
+  it("reloads the history when the backend doesn't return the saved conversation", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem("token", "abc");
+    let historyCalls = 0;
+    const fetchMock = stubApi({
+      "/api/conversations": () => json(historyCalls++ === 0 ? [] : [conversation]),
+      "/api/ask": () => json({ question: "Cells", answer: "Old backend reply" }),
+    });
+
+    render(<App />);
+    await screen.findByRole("button", { name: "Logout" });
+    await user.type(screen.getByLabelText("Your question"), "Cells");
+    await user.click(screen.getByRole("button", { name: "Ask AI" }));
+
+    expect(await screen.findByText("Old backend reply")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /What is DNA\?/ })).toBeInTheDocument();
+    expect(callsTo(fetchMock, "/api/conversations").length).toBeGreaterThanOrEqual(2);
+  });
+
   it("opens a past conversation with the keyboard", async () => {
     const user = userEvent.setup();
     localStorage.setItem("token", "abc");
